@@ -18,9 +18,6 @@ public class PizzaOrderingApp : IPizzaOrderingApp
     private readonly ICouponEngine _couponEngine;
 
     /// <summary>
-    /// Legacy constructor used prior to DI introduction. Prefer the constructor accepting dependencies.
-    /// </summary>
-    /// <summary>
     /// Dependency-injection constructor.
     /// </summary>
     public PizzaOrderingApp(IOrderManager orderManager, IConsoleUI ui, ILogger<PizzaOrderingApp> logger, IOptions<AppSettings> options, ICouponEngine? couponEngine = null)
