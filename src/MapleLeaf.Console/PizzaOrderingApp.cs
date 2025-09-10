@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MapleLeaf.App.Coupons;
 
 namespace MapleLeaf.App;
 
@@ -14,6 +15,7 @@ public class PizzaOrderingApp : IPizzaOrderingApp
     private readonly IConsoleUI _ui;
     private readonly ILogger<PizzaOrderingApp> _logger;
     private readonly AppSettings _settings;
+    private readonly ICouponEngine _couponEngine;
 
     /// <summary>
     /// Legacy constructor used prior to DI introduction. Prefer the constructor accepting dependencies.
@@ -21,12 +23,13 @@ public class PizzaOrderingApp : IPizzaOrderingApp
     /// <summary>
     /// Dependency-injection constructor.
     /// </summary>
-    public PizzaOrderingApp(IOrderManager orderManager, IConsoleUI ui, ILogger<PizzaOrderingApp> logger, IOptions<AppSettings> options)
+    public PizzaOrderingApp(IOrderManager orderManager, IConsoleUI ui, ILogger<PizzaOrderingApp> logger, IOptions<AppSettings> options, ICouponEngine? couponEngine = null)
     {
         _orderManager = orderManager ?? throw new ArgumentNullException(nameof(orderManager));
         _ui = ui ?? throw new ArgumentNullException(nameof(ui));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _settings = options?.Value ?? new AppSettings();
+        _couponEngine = couponEngine ?? NullCouponEngine.Instance; // fallback to null-object implementation
     }
 
     public async Task RunAsync()
@@ -132,7 +135,23 @@ public class PizzaOrderingApp : IPizzaOrderingApp
         }
         
         _orderManager.AddOrder(order);
-        _ui.WriteLine($"\nOrder created successfully! Total: ${order.TotalPrice:F2}");
+
+        // Evaluate coupons via engine (specification pattern)
+        var evaluation = _couponEngine.Evaluate(order);
+        _ui.WriteLine("\nOrder created successfully!");
+        _ui.WriteLine($"Subtotal: ${evaluation.Subtotal:F2}");
+        if (evaluation.TotalDiscount > 0)
+        {
+            foreach (var c in evaluation.AppliedCoupons)
+            {
+                _ui.WriteLine($"Applied {c.Code}: -${c.DiscountAmount:F2} ({c.Description})");
+            }
+            _ui.WriteLine($"Final Total: ${evaluation.FinalTotal:F2}");
+        }
+        else
+        {
+            _ui.WriteLine($"Total: ${evaluation.FinalTotal:F2}");
+        }
     }
 
     private void ShowPizzaMenu()

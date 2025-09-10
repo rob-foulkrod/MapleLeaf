@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
+using MapleLeaf.App.Coupons;
 
 // Banner remains outside the host so it appears immediately when the process starts.
 Console.WriteLine("Welcome to MapleLeaf Pizza Ordering System!");
@@ -24,6 +25,7 @@ var host = Host.CreateDefaultBuilder(args)
 		services.AddSingleton<IOrderManager, OrderManager>(); // Shared order state.
 		services.AddSingleton<IConsoleUI, ConsoleUI>(); // Console abstraction.
 		services.AddTransient<IPizzaOrderingApp, PizzaOrderingApp>(); // App root.
+		services.AddCouponEngine(); // Coupon engine (specification + aggregation pattern)
 	})
 	.ConfigureLogging(logging => { /* default providers already added */ })
 	.Build();
