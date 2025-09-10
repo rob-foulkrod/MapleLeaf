@@ -416,3 +416,11 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Coverage & test result artifacts
+src/TestResultsCoverage/
+coverage-report/
+TestResults/
+
+# PowerShell script transient output (if any future scripts create temp folders)
+scripts/*.tmp/

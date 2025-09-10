@@ -11,23 +11,40 @@ A console-based pizza ordering application built with .NET 8. This application p
 - **Order Tracking**: Automatic order ID assignment and timestamping
 - **Price Calculation**: Automatic total price calculation for orders
 
+## Quick Start
+
+```powershell
+git clone https://github.com/rob-foulkrod/MapleLeaf.git
+cd MapleLeaf/src
+dotnet build MapleLeaf.sln
+dotnet run --project MapleLeaf.Console
+```
+
+Run tests:
+
+```powershell
+cd MapleLeaf/src
+dotnet test MapleLeaf.sln
+```
+
 ## Project Structure
 
 ```
 MapleLeaf/
-├── src/
-│   └── MapleLeaf.Console/          # Main console application
-│       ├── Program.cs              # Application entry point
-│       ├── PizzaOrderingApp.cs     # Main application logic and UI
-│       ├── Pizza.cs                # Pizza domain model
-│       ├── PizzaOrder.cs           # Order domain model
-│       └── OrderManager.cs         # Order management service
-│   └── MapleLeaf.Tests/            # Unit tests
-│       ├── PizzaTests.cs           # Tests for Pizza class
-│       ├── PizzaOrderTests.cs      # Tests for PizzaOrder class
-│       └── OrderManagerTests.cs     # Tests for OrderManager class
-├── MapleLeaf.sln                    # Solution file
-└── README.md                        # This file
+├── README.md
+├── LICENSE
+└── src/
+   ├── MapleLeaf.sln                 # Solution file (kept under src)
+   ├── MapleLeaf.Console/            # Main console application
+   │   ├── Program.cs                # Application entry point
+   │   ├── PizzaOrderingApp.cs       # Main application logic and UI
+   │   ├── Pizza.cs                  # Pizza domain model
+   │   ├── PizzaOrder.cs             # Order domain model
+   │   └── OrderManager.cs           # Order management service
+   └── MapleLeaf.Tests/              # Unit tests
+      ├── OrderManagerTests.cs      # Tests for OrderManager class
+      ├── PizzaOrderTests.cs        # Tests for PizzaOrder class
+      └── UnitTest1.cs              # Placeholder / sample test
 ```
 
 ## Getting Started
@@ -39,30 +56,42 @@ MapleLeaf/
 ### Building the Application
 
 1. Clone the repository:
-   ```bash
+   ```powershell
    git clone https://github.com/rob-foulkrod/MapleLeaf.git
    cd MapleLeaf
    ```
 
-2. Restore dependencies and build:
-   ```bash
-   dotnet build
-   ```
+2. Restore dependencies and build (run from the repository root):
+```powershell
+cd src
+dotnet restore
+dotnet build MapleLeaf.sln
+```
 
 ### Running the Application
 
 To start the pizza ordering system:
 
-```pwsh
-dotnet run --project src/MapleLeaf.Console
+```powershell
+# From the repository root
+cd src
+dotnet run --project MapleLeaf.Console
 ```
 
 ### Running Tests
 
 To run the unit tests:
 
-```pwsh
-dotnet test
+```powershell
+# From the repository root
+cd src
+dotnet test MapleLeaf.sln
+
+# Faster when you've just built:
+dotnet test MapleLeaf.sln --no-build
+
+# Run only OrderManager tests:
+dotnet test MapleLeaf.sln --filter FullyQualifiedName~OrderManagerTests
 ```
 
 ## How to Use
@@ -126,18 +155,54 @@ Service class that manages pizza orders:
 - **Testing Framework**: xUnit
 - **Project Type**: Console Application
 
-## Future Enhancements
+## Code Coverage
 
-This is a basic project structure that could be extended with:
+The test project already references `coverlet.collector`, so you can collect coverage using the built-in DataCollector.
 
-- Pizza customization options (size, toppings)
-- Order persistence (database or file storage)
-- Order status tracking (pending, preparing, ready, delivered)
-- Customer management system
-- Payment processing
-- Delivery management
-- Web-based interface
-- API endpoints for order management
+Generate coverage (Cobertura XML) into a custom folder:
+
+```powershell
+cd src
+dotnet test MapleLeaf.sln --collect:"XPlat Code Coverage" --results-directory ./TestResultsCoverage
+```
+
+Faster if you just built:
+
+```powershell
+dotnet test MapleLeaf.sln --collect:"XPlat Code Coverage" --results-directory ./TestResultsCoverage --no-build
+```
+
+The Cobertura file will be located under a generated test run directory, for example:
+
+```
+src/TestResultsCoverage/<run-id>/coverage.cobertura.xml
+```
+
+You can convert or view it with tools such as ReportGenerator:
+
+```powershell
+dotnet tool install -g dotnet-reportgenerator-globaltool   # once
+reportgenerator -reports:src/TestResultsCoverage/**/coverage.cobertura.xml -targetdir:coverage-report
+```
+
+Then open `coverage-report/index.htm` in a browser.
+
+### One-Step Script
+
+This repo includes a helper script that runs tests with coverage and generates the HTML report:
+
+```powershell
+# From repo root (first time only installs tools if not present)
+dotnet tool restore
+pwsh ./scripts/generate-coverage.ps1
+
+# Skip the build step if you just built:
+pwsh ./scripts/generate-coverage.ps1 -NoBuild
+```
+
+Outputs:
+- Cobertura XML under `src/TestResultsCoverage/<run-id>/coverage.cobertura.xml`
+- HTML report under `coverage-report/index.htm`
 
 ## Contributing
 
@@ -149,4 +214,4 @@ This is a basic project structure that could be extended with:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
