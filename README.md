@@ -22,13 +22,12 @@ MapleLeaf/
 │       ├── Pizza.cs                # Pizza domain model
 │       ├── PizzaOrder.cs           # Order domain model
 │       └── OrderManager.cs         # Order management service
-├── tests/
 │   └── MapleLeaf.Tests/            # Unit tests
 │       ├── PizzaTests.cs           # Tests for Pizza class
 │       ├── PizzaOrderTests.cs      # Tests for PizzaOrder class
-│       └── OrderManagerTests.cs    # Tests for OrderManager class
-├── MapleLeaf.sln                   # Solution file
-└── README.md                       # This file
+│       └── OrderManagerTests.cs     # Tests for OrderManager class
+├── MapleLeaf.sln                    # Solution file
+└── README.md                        # This file
 ```
 
 ## Getting Started
@@ -54,7 +53,7 @@ MapleLeaf/
 
 To start the pizza ordering system:
 
-```bash
+```pwsh
 dotnet run --project src/MapleLeaf.Console
 ```
 
@@ -62,7 +61,7 @@ dotnet run --project src/MapleLeaf.Console
 
 To run the unit tests:
 
-```bash
+```pwsh
 dotnet test
 ```
 
