@@ -57,8 +57,8 @@ public class PizzaOrderingApp : IPizzaOrderingApp
             
             if (running)
             {
-        _ui.WriteLine("\nPress any key to continue...");
-        _ui.ReadKey();
+                _ui.WriteLine("\nPress any key to continue...");
+                _ui.ReadKey();
             }
         }
     }
