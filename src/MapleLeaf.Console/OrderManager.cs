@@ -1,6 +1,6 @@
 namespace MapleLeaf.App;
 
-public class OrderManager
+public class OrderManager : IOrderManager
 {
     private readonly List<PizzaOrder> _orders = new();
 
