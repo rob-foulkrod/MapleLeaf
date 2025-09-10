@@ -1,6 +1,7 @@
 ﻿using MapleLeaf.App;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 
 // Banner remains outside the host so it appears immediately when the process starts.
 Console.WriteLine("Welcome to MapleLeaf Pizza Ordering System!");
@@ -10,12 +11,21 @@ Console.WriteLine("==========================================");
 // concrete types. Interfaces will be introduced in subsequent steps for improved
 // abstraction and testability.
 var host = Host.CreateDefaultBuilder(args)
-	.ConfigureServices(services =>
+	.ConfigureAppConfiguration((ctx, config) =>
 	{
-		// Service registrations (initial concrete registrations). Next steps will introduce interfaces for OrderManager.
-		services.AddSingleton<OrderManager>(); // Singleton for shared state across the app lifetime.
-		services.AddTransient<IPizzaOrderingApp, PizzaOrderingApp>(); // Interface-based registration for the app root.
+		// Additional configuration sources can be added here (env-specific json, etc.)
+		config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 	})
+	.ConfigureServices((ctx, services) =>
+	{
+		services.Configure<AppSettings>(ctx.Configuration); // Bind root configuration to AppSettings structure.
+
+		// Interface-based service registrations.
+		services.AddSingleton<IOrderManager, OrderManager>(); // Shared order state.
+		services.AddSingleton<IConsoleUI, ConsoleUI>(); // Console abstraction.
+		services.AddTransient<IPizzaOrderingApp, PizzaOrderingApp>(); // App root.
+	})
+	.ConfigureLogging(logging => { /* default providers already added */ })
 	.Build();
 
 // Resolve the application root and execute via its interface abstraction.

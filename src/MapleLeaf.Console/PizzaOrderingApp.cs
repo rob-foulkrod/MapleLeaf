@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
 namespace MapleLeaf.App;
 
 /// <summary>
@@ -7,23 +10,23 @@ namespace MapleLeaf.App;
 /// </summary>
 public class PizzaOrderingApp : IPizzaOrderingApp
 {
-    private readonly OrderManager _orderManager;
+    private readonly IOrderManager _orderManager;
+    private readonly IConsoleUI _ui;
+    private readonly ILogger<PizzaOrderingApp> _logger;
+    private readonly AppSettings _settings;
 
     /// <summary>
     /// Legacy constructor used prior to DI introduction. Prefer the constructor accepting dependencies.
     /// </summary>
-    public PizzaOrderingApp()
-    {
-        _orderManager = new OrderManager();
-    }
-
     /// <summary>
-    /// Dependency-injection friendly constructor.
+    /// Dependency-injection constructor.
     /// </summary>
-    /// <param name="orderManager">The order manager instance controlling lifecycle of pizza orders.</param>
-    public PizzaOrderingApp(OrderManager orderManager)
+    public PizzaOrderingApp(IOrderManager orderManager, IConsoleUI ui, ILogger<PizzaOrderingApp> logger, IOptions<AppSettings> options)
     {
         _orderManager = orderManager ?? throw new ArgumentNullException(nameof(orderManager));
+        _ui = ui ?? throw new ArgumentNullException(nameof(ui));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _settings = options?.Value ?? new AppSettings();
     }
 
     public async Task RunAsync()
@@ -33,7 +36,7 @@ public class PizzaOrderingApp : IPizzaOrderingApp
         while (running)
         {
             ShowMainMenu();
-            var choice = Console.ReadLine();
+            var choice = _ui.ReadLine();
             
             switch (choice)
             {
@@ -44,45 +47,46 @@ public class PizzaOrderingApp : IPizzaOrderingApp
                     ShowAllOrders();
                     break;
                 case "3":
-                    Console.WriteLine("Thank you for using MapleLeaf Pizza Ordering System!");
+                    _ui.WriteLine("Thank you for using MapleLeaf Pizza Ordering System!");
                     running = false;
                     break;
                 default:
-                    Console.WriteLine("Invalid choice. Please try again.");
+                    _ui.WriteLine("Invalid choice. Please try again.");
                     break;
             }
             
             if (running)
             {
-                Console.WriteLine("\nPress any key to continue...");
-                Console.ReadKey();
+        _ui.WriteLine("\nPress any key to continue...");
+        _ui.ReadKey();
             }
         }
     }
 
     private void ShowMainMenu()
     {
-        Console.Clear();
-        Console.WriteLine("MapleLeaf Pizza Ordering System");
-        Console.WriteLine("==============================");
-        Console.WriteLine("1. Create New Order");
-        Console.WriteLine("2. View All Orders");
-        Console.WriteLine("3. Exit");
-        Console.WriteLine("\nPlease enter your choice (1-3): ");
+    _ui.Clear();
+    var title = _settings.Application.Title;
+    _ui.WriteLine(title);
+    _ui.WriteLine(new string('=', title.Length));
+    _ui.WriteLine("1. Create New Order");
+    _ui.WriteLine("2. View All Orders");
+    _ui.WriteLine("3. Exit");
+    _ui.WriteLine("\nPlease enter your choice (1-3): ");
     }
 
     private async Task CreateNewOrderAsync()
     {
-        Console.Clear();
-        Console.WriteLine("Create New Pizza Order");
-        Console.WriteLine("=====================");
+    _ui.Clear();
+    _ui.WriteLine("Create New Pizza Order");
+    _ui.WriteLine("=====================");
         
-        Console.Write("Enter customer name: ");
-        var customerName = Console.ReadLine() ?? "";
+    _ui.Write("Enter customer name: ");
+    var customerName = _ui.ReadLine() ?? "";
         
         if (string.IsNullOrWhiteSpace(customerName))
         {
-            Console.WriteLine("Customer name is required!");
+            _ui.WriteLine("Customer name is required!");
             return;
         }
 
@@ -92,34 +96,34 @@ public class PizzaOrderingApp : IPizzaOrderingApp
         while (addingPizzas)
         {
             ShowPizzaMenu();
-            var choice = Console.ReadLine();
+            var choice = _ui.ReadLine();
             
             switch (choice)
             {
                 case "1":
                     order.AddPizza(new Pizza("Margherita", 12.99m));
-                    Console.WriteLine("Margherita pizza added to order!");
+                    _ui.WriteLine("Margherita pizza added to order!");
                     break;
                 case "2":
                     order.AddPizza(new Pizza("Pepperoni", 14.99m));
-                    Console.WriteLine("Pepperoni pizza added to order!");
+                    _ui.WriteLine("Pepperoni pizza added to order!");
                     break;
                 case "3":
                     order.AddPizza(new Pizza("Vegetarian", 13.99m));
-                    Console.WriteLine("Vegetarian pizza added to order!");
+                    _ui.WriteLine("Vegetarian pizza added to order!");
                     break;
                 case "4":
                     addingPizzas = false;
                     break;
                 default:
-                    Console.WriteLine("Invalid choice. Please try again.");
+                    _ui.WriteLine("Invalid choice. Please try again.");
                     continue;
             }
             
             if (addingPizzas)
             {
-                Console.Write("Add another pizza? (y/n): ");
-                var addMore = Console.ReadLine();
+                _ui.Write("Add another pizza? (y/n): ");
+                var addMore = _ui.ReadLine();
                 if (addMore?.ToLower() != "y")
                 {
                     addingPizzas = false;
@@ -128,45 +132,45 @@ public class PizzaOrderingApp : IPizzaOrderingApp
         }
         
         _orderManager.AddOrder(order);
-        Console.WriteLine($"\nOrder created successfully! Total: ${order.TotalPrice:F2}");
+        _ui.WriteLine($"\nOrder created successfully! Total: ${order.TotalPrice:F2}");
     }
 
     private void ShowPizzaMenu()
     {
-        Console.WriteLine("\nAvailable Pizzas:");
-        Console.WriteLine("================");
-        Console.WriteLine("1. Margherita - $12.99");
-        Console.WriteLine("2. Pepperoni - $14.99");
-        Console.WriteLine("3. Vegetarian - $13.99");
-        Console.WriteLine("4. Finish order");
-        Console.Write("\nSelect pizza (1-4): ");
+        _ui.WriteLine("\nAvailable Pizzas:");
+        _ui.WriteLine("================");
+        _ui.WriteLine("1. Margherita - $12.99");
+        _ui.WriteLine("2. Pepperoni - $14.99");
+        _ui.WriteLine("3. Vegetarian - $13.99");
+        _ui.WriteLine("4. Finish order");
+        _ui.Write("\nSelect pizza (1-4): ");
     }
 
     private void ShowAllOrders()
     {
-        Console.Clear();
-        Console.WriteLine("All Orders");
-        Console.WriteLine("==========");
+        _ui.Clear();
+        _ui.WriteLine("All Orders");
+        _ui.WriteLine("==========");
         
         var orders = _orderManager.GetAllOrders();
         
         if (!orders.Any())
         {
-            Console.WriteLine("No orders found.");
+            _ui.WriteLine("No orders found.");
             return;
         }
         
         foreach (var order in orders)
         {
-            Console.WriteLine($"Order #{order.Id} - Customer: {order.CustomerName}");
-            Console.WriteLine($"Order Date: {order.OrderDate:yyyy-MM-dd HH:mm}");
-            Console.WriteLine("Pizzas:");
+            _ui.WriteLine($"Order #{order.Id} - Customer: {order.CustomerName}");
+            _ui.WriteLine($"Order Date: {order.OrderDate:yyyy-MM-dd HH:mm}");
+            _ui.WriteLine("Pizzas:");
             foreach (var pizza in order.Pizzas)
             {
-                Console.WriteLine($"  - {pizza.Name} (${pizza.Price:F2})");
+                _ui.WriteLine($"  - {pizza.Name} (${pizza.Price:F2})");
             }
-            Console.WriteLine($"Total: ${order.TotalPrice:F2}");
-            Console.WriteLine(new string('-', 40));
+            _ui.WriteLine($"Total: ${order.TotalPrice:F2}");
+            _ui.WriteLine(new string('-', 40));
         }
     }
 }
