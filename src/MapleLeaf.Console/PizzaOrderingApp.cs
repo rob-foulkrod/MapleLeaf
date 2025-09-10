@@ -65,14 +65,14 @@ public class PizzaOrderingApp : IPizzaOrderingApp
 
     private void ShowMainMenu()
     {
-    _ui.Clear();
-    var title = _settings.Application.Title;
-    _ui.WriteLine(title);
-    _ui.WriteLine(new string('=', title.Length));
-    _ui.WriteLine("1. Create New Order");
-    _ui.WriteLine("2. View All Orders");
-    _ui.WriteLine("3. Exit");
-    _ui.WriteLine("\nPlease enter your choice (1-3): ");
+        _ui.Clear();
+        var title = _settings.Application.Title;
+        _ui.WriteLine(title);
+        _ui.WriteLine(new string('=', title.Length));
+        _ui.WriteLine("1. Create New Order");
+        _ui.WriteLine("2. View All Orders");
+        _ui.WriteLine("3. Exit");
+        _ui.WriteLine("\nPlease enter your choice (1-3): ");
     }
 
     private async Task CreateNewOrderAsync()
