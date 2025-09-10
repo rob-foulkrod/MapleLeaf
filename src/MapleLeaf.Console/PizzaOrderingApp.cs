@@ -1,12 +1,29 @@
 namespace MapleLeaf.App;
 
-public class PizzaOrderingApp
+/// <summary>
+/// Root interactive application for managing pizza orders. Implements <see cref="IPizzaOrderingApp"/> so it
+/// can be resolved through dependency injection. For the initial transition we retain the parameterless
+/// constructor to avoid breaking external code paths while introducing a DI-friendly constructor.
+/// </summary>
+public class PizzaOrderingApp : IPizzaOrderingApp
 {
     private readonly OrderManager _orderManager;
 
+    /// <summary>
+    /// Legacy constructor used prior to DI introduction. Prefer the constructor accepting dependencies.
+    /// </summary>
     public PizzaOrderingApp()
     {
         _orderManager = new OrderManager();
+    }
+
+    /// <summary>
+    /// Dependency-injection friendly constructor.
+    /// </summary>
+    /// <param name="orderManager">The order manager instance controlling lifecycle of pizza orders.</param>
+    public PizzaOrderingApp(OrderManager orderManager)
+    {
+        _orderManager = orderManager ?? throw new ArgumentNullException(nameof(orderManager));
     }
 
     public async Task RunAsync()
